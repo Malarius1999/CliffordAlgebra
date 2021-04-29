@@ -56,27 +56,64 @@ class RefRot(Scene):
 
         self.play(
             FadeOut(linAlg), FadeOut(GA[0]), FadeOut(GA[1]), FadeOut(GA[2]), FadeOut(GA[3]),FadeOut(GA[4]),
-            FadeOut(vec_vp1), FadeOut(vec_vp2), FadeOut(vec_v2Tex),
+            FadeOut(vec_vp1), FadeOut(vec_vp2),
             Transform(title[1], title[2])
             )
 
         vec_w = Arrow(ORIGIN, [2, 0, 0], color = GREEN, buff = 0)
         vec_wTex = MathTex(r"w").move_to(vec_w.tip).shift(RIGHT*0.4)
         vec_v3 = Arrow(ORIGIN, [1.8,-2.6,0], color = ORANGE, buff = 0)
-        vec_v3Tex = MathTex(r"v'").move_to(vec_v3.tip).shift(RIGHT*0.4)
-        alpha = Angle(vec_v, vec_v3, radius = 0.75, other_angle=False)
-        alpha2 = Angle(vec_v, vec_v3, radius = 0.2, other_angle=False)
-        alphaTex = MathTex(r"\alpha").move_to(alpha).shift(0.4 * UP + 0.25 * LEFT)
+        vec_v3Tex = MathTex(r"v''").move_to(vec_v3.tip).shift(RIGHT*0.4)
+        alpha = Angle(vec_v, vec_v3, radius = 0.75, other_angle=False, color = RED)
+        alphaTex = MathTex(r"\alpha", color = RED).move_to(alpha).shift(0.4 * UP + 0.25 * LEFT)
 
         linAlg = MathTex(r"\text{In LinAlg: \enspace}", r"v^{''} = v \begin{pmatrix} cos(\alpha) & sin(\alpha) \\ -sin(\alpha) & cos(\alpha) \end{pmatrix}").scale(0.65).to_corner(UP + LEFT).shift(DOWN)
         self.play(Write(linAlg), Write(vec_w), Write(vec_wTex), Write(vec_v3), Write(vec_v3Tex), Write(alpha), Write(alphaTex))
 
-        GA = [
-            MathTex(r"2 * \text{Reflektion} = \text{Rotation}").scale(0.65).to_corner(UP + LEFT).shift(2*DOWN),
-            MathTex(r"\phi_1 + \phi_2 = 2*\phi = \alpha").scale(0.65).to_corner(UP + LEFT).shift(2.5*DOWN),
+        ges = [
+            MathTex(r"\rightarrow 2 * \text{Reflektion} = \text{Rotation}").scale(0.65).to_corner(UP + LEFT).shift(2*DOWN),
+            MathTex(r"\rightarrow 2*\phi = \alpha").scale(0.65).to_corner(UP + LEFT).shift(2.5*DOWN),
             ]
-        self.play(Write(GA[0]), Write(GA[1]))
-        self.play(Transform(alpha, alpha2))
+
+        phi = Angle(vec_w, vec_u, radius = 1, other_angle=False, color = YELLOW)
+        phiTex = MathTex(r"\phi", color = YELLOW).move_to(phi).shift(0.2 * RIGHT + 0.3*UP)
+        alpha2 = Angle(vec_v3, vec_v, radius = 1.25, other_angle=False, color = RED)
+        alphaTex2 = MathTex(r"\alpha", color=RED).move_to(alpha2).shift(0.4 * DOWN + 0.4 * RIGHT)
+
+        self.play(Write(ges[0]), Write(ges[1]))
+        self.play(Transform(alpha, alpha2), Transform(alphaTex, alphaTex2))
+        self.play(Write(phi), Write(phiTex))
+
+        GA = [
+            MathTex(r"\text{In GA: \qquad}", *"v^{'} = u v u^{-1}".split()).scale(0.65).to_corner(UP + LEFT).shift(3.5*DOWN),
+            MathTex(r"\text{In GA: \qquad}", *"v^{''} = w ( u v u^{-1} ) w^{-1}".split()).scale(0.65).to_corner(UP + LEFT).shift(3.5*DOWN),
+            MathTex(r"\text{In GA: \qquad}", *"v^{''} = (wu) v (uw)^{-1}".split()).scale(0.65).to_corner(UP + LEFT).shift(3.5*DOWN),
+            MathTex(r"v^{''} = (wu) v (uw)^{-1}").scale(0.65).to_corner(UP + LEFT).shift(6*DOWN),
+            MathTex(r"v^{''} = |wu| e^{-\phi e_1e_2} v \dfrac{1}{|uw|} e^{\phi e_1e_2}").scale(0.65).to_corner(UP + LEFT).shift(6*DOWN),
+            MathTex(r"v^{''} = v e^{2 \phi e_1e_2} = v e^{\alpha e_1 e_2}").scale(0.65).to_corner(UP + LEFT).shift(6*DOWN)
+            ]
+
+        self.play(Write(GA[0]))
+        self.play(ReplacementTransform(GA[0][1:], GA[1][1:]))
+        self.play(ReplacementTransform(GA[1][3:6], GA[2][3]), ReplacementTransform(GA[1][8:11], GA[2][5]))
+
+        brace = Brace(GA[2][3])
+        reminder = [
+            MathTex(r"\text{Produkt der Vektoren } wu = \text{Scalar} + \text{Bivektor}").scale(0.5).to_corner(UP + LEFT).shift(4.5*DOWN),
+            MathTex(r"\Rightarrow \text{ebenfalls in Exponentialsschreibweise darstellbar:}").scale(0.5).to_corner(UP + LEFT).shift(4.75*DOWN),
+            MathTex(r"\Rightarrow uw = |u|e^{\phi_u e_1e_2}|w|e^{\phi_w e_1e_2}").scale(0.5).to_corner(UP + LEFT).shift(5*DOWN),
+            MathTex(r"\Rightarrow uw = |uw|e^{\phi e_1e_2}").scale(0.5).to_corner(UP + LEFT).shift(5*DOWN),
+            MathTex(r"\Rightarrow \text{Nur } \phi \text{ von Bedeutung. Länge und Position nicht}").scale(0.5).to_corner(UP + LEFT).shift(7*DOWN)
+            ]
+        self.play(Write(brace), Write(reminder[0]))
+        self.play(Write(reminder[1]))
+        self.play(Write(reminder[2]))
+        self.play(ReplacementTransform(reminder[2], reminder[3]))
+
+        self.play(Write(GA[3]))
+        self.play(ReplacementTransform(GA[3], GA[4]))
+        self.play(ReplacementTransform(GA[4], GA[5]))
+        self.play(Write(reminder[4]))
 
         self.wait(10)
 
